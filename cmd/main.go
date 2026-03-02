@@ -1,17 +1,24 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/gin-gonic/gin"
-
-	"kwadw0/post-chat/services"
-)
+import "log"
 
 func main() {
-	router := gin.Default()
-	message := services.ChatService("Hello from Main")
-	fmt.Println(message)
-	//router.GET("/", services.ChatService)
-	router.Run(":8000")
+	cfg := config {
+		addr: ":8000",
+		db: dbConfig{},
+	}
+	api := application{
+		config: cfg,
+	}
+  	api.run(api.mount())
+
+	if err := api.run((api.mount())); err != nil {
+		log.Printf("Application failed to start, err: %s", err)
+	}
 }
+
+
+
+
+
+
