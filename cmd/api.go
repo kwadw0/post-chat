@@ -1,13 +1,18 @@
 package main
 
 import (
+	repo "kwadw0/gocommerce/internal/adapters/postgres/sqlc"
 	"kwadw0/gocommerce/internal/products"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	_ "kwadw0/gocommerce/docs"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 func (app *application) run(h http.Handler) error {
@@ -18,7 +23,7 @@ func (app *application) run(h http.Handler) error {
 		ReadTimeout:  time.Second * 10,
 		IdleTimeout:  time.Minute,
 	}
-	log.Println("Application has started listening on PORT %s", app.config.addr)
+	slog.Info("Application has started listening", "addr", app.config.addr)
 	return srv.ListenAndServe()
 }
 
@@ -41,14 +46,18 @@ func (app *application) mount() http.Handler {
 		w.Write([]byte("hi Test"))
 	})
 
-	productService := products.NewService()
+	productService := products.NewService(repo.New(app.db))
 	productHandler := products.NewHandler(productService)
 	r.Get("/products", productHandler.GetAllProducts)
+	r.Post("/products", productHandler.AddProduct)
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 	return r
 }
 
 type application struct {
 	config config
+
+	db *pgxpool.Pool
 }
 
 type config struct {
