@@ -5,7 +5,6 @@ import (
 	"net/http"
 )
 
-
 func WriteJson(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -16,12 +15,37 @@ func WriteJson(w http.ResponseWriter, status int, data any) {
 func ReadJson(w http.ResponseWriter, r *http.Request, data any) error {
 	// 1. Limit the size of the mail to 1 Megabyte
 	// (We don't want to try and read a library!)
-	maxBytes := 1_048_576 
+	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 
 	// 2. Setup the Decoder
 	dec := json.NewDecoder(r.Body)
-	
+
 	// 3. Try to read the mail into our 'data' container
 	return dec.Decode(data)
+}
+
+type GenericResponse struct {
+	Message    string `json:"message"`
+	StatusCode int    `json:"statusCode"`
+	Error      any    `json:"error"`
+	Data       any    `json:"data"`
+}
+
+func Success(w http.ResponseWriter, status int, message string, data any) {
+	WriteJson(w, status, GenericResponse{
+		Message:    message,
+		StatusCode: status,
+		Error:      nil,
+		Data:       data,
+	})
+}
+
+func Error(w http.ResponseWriter, status int, message string, err any) {
+	WriteJson(w, status, GenericResponse{
+		Message:    message,
+		StatusCode: status,
+		Error:      err,
+		Data:       nil,
+	})
 }

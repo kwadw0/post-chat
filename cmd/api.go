@@ -3,6 +3,7 @@ package main
 import (
 	repo "kwadw0/gocommerce/internal/adapters/postgres/sqlc"
 	"kwadw0/gocommerce/internal/products"
+	"kwadw0/gocommerce/users"
 	"log/slog"
 	"net/http"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	_ "kwadw0/gocommerce/docs"
+
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
@@ -50,7 +52,15 @@ func (app *application) mount() http.Handler {
 	productHandler := products.NewHandler(productService)
 	r.Get("/products", productHandler.GetAllProducts)
 	r.Post("/products", productHandler.AddProduct)
-	r.Get("/swagger/*", httpSwagger.WrapHandler)
+
+	userService := users.NewUserService(repo.New(app.db))
+	userHandler := users.NewHandler(userService)
+	r.Post("/signup", userHandler.CreateUser)
+
+	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/docs/index.html", http.StatusSeeOther)
+	})
+	r.Get("/docs/*", httpSwagger.WrapHandler)
 	return r
 }
 

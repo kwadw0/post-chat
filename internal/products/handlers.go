@@ -2,7 +2,6 @@ package products
 
 import (
 	"kwadw0/gocommerce/internal/json"
-	"log"
 	"log/slog"
 	"net/http"
 )
@@ -18,14 +17,13 @@ func NewHandler(s Service) *handler {
 func (h *handler) GetAllProducts(w http.ResponseWriter, r *http.Request) {
 	products, err := h.service.GetAllProducts(r.Context())
 	if err != nil {
-		log.Println("Error getting products", err)
-		json.WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
+		slog.Error("Error getting products", "error", err)
+		json.Error(w, http.StatusInternalServerError, "Failed to retrieve products", "Internal server error")
 		return
 	}
 
-	json.WriteJson(w, http.StatusOK, products)
+	json.Success(w, http.StatusOK, "Products retrieved successfully", products)
 }
-
 
 // AddProduct godoc
 // @Summary      Create a new product
@@ -41,16 +39,16 @@ func (h *handler) AddProduct(w http.ResponseWriter, r *http.Request) {
 	var payload CreateProduct
 	if err := json.ReadJson(w, r, &payload); err != nil {
 		slog.Error("Error reading json", "error", err)
-		json.WriteJson(w, http.StatusBadRequest, map[string]string{"error": "Invalid json"})
+		json.Error(w, http.StatusBadRequest, "Invalid JSON payload", err.Error())
 		return
 	}
 
 	product, err := h.service.AddProduct(r.Context(), payload)
 	if err != nil {
-		log.Println("Error adding product", err)
-		json.WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
+		slog.Error("Error adding product", "error", err)
+		json.Error(w, http.StatusInternalServerError, "Failed to create product", "Internal server error")
 		return
 	}
 
-	json.WriteJson(w, http.StatusOK, product)
+	json.Success(w, http.StatusCreated, "Product created successfully!", product)
 }
