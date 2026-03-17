@@ -24,6 +24,32 @@ definitions:
       uuid:
         type: string
     type: object
+  users.CreateUserDTO:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+    type: object
+  users.UserResponse:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone:
+        type: string
+      uuid:
+        type: string
+    type: object
 host: localhost:8000
 info:
   contact:
@@ -63,4 +89,32 @@ paths:
       summary: Create a new product
       tags:
       - products
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Takes a JSON payload and registers a new user in our database
+      parameters:
+      - description: User to register
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/users.CreateUserDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/users.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new user
+      tags:
+      - Authentication
 swagger: "2.0"

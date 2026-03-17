@@ -12,7 +12,23 @@ import (
 )
 
 const createProduct = `-- name: CreateProduct :one
-INSERT INTO products (uuid, name, description, price, quantity) VALUES (gen_random_uuid(), $1, $2, $3, $4) RETURNING uuid, name, price, description, quantity, created_at, updated_at
+INSERT INTO
+    products (
+        uuid,
+        name,
+        description,
+        price,
+        quantity
+    )
+VALUES (
+        gen_random_uuid (),
+        $1,
+        $2,
+        $3,
+        $4
+    )
+RETURNING
+    uuid, name, price, description, quantity, created_at, updated_at
 `
 
 type CreateProductParams struct {
@@ -42,9 +58,60 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 	return i, err
 }
 
+const createUser = `-- name: CreateUser :one
+INSERT INTO
+    users (
+        uuid,
+        first_name,
+        last_name,
+        email,
+        password,
+        phone
+    )
+VALUES (
+        gen_random_uuid (),
+        $1,
+        $2,
+        $3,
+        $4,
+        $5
+    )
+RETURNING
+    uuid, first_name, last_name, email, password, phone, created_at, updated_at
+`
+
+type CreateUserParams struct {
+	FirstName string      `json:"first_name"`
+	LastName  string      `json:"last_name"`
+	Email     string      `json:"email"`
+	Password  string      `json:"password"`
+	Phone     pgtype.Text `json:"phone"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser,
+		arg.FirstName,
+		arg.LastName,
+		arg.Email,
+		arg.Password,
+		arg.Phone,
+	)
+	var i User
+	err := row.Scan(
+		&i.Uuid,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Password,
+		&i.Phone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getProduct = `-- name: GetProduct :one
-SELECT uuid, name, price, description, quantity, created_at, updated_at FROM products
-WHERE uuid = $1 LIMIT 1
+SELECT uuid, name, price, description, quantity, created_at, updated_at FROM products WHERE uuid = $1 LIMIT 1
 `
 
 func (q *Queries) GetProduct(ctx context.Context, uuid string) (Product, error) {
@@ -63,8 +130,7 @@ func (q *Queries) GetProduct(ctx context.Context, uuid string) (Product, error) 
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT uuid, name, price, description, quantity, created_at, updated_at FROM products
-ORDER BY name
+SELECT uuid, name, price, description, quantity, created_at, updated_at FROM products ORDER BY name
 `
 
 func (q *Queries) ListProducts(ctx context.Context) ([]Product, error) {
