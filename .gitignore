@@ -32,3 +32,4 @@ go.work
 bin/
 dist/
 /home/kingqhojo/Documents/Go_projects/post-chat/main
+tmp/

@@ -33,9 +33,26 @@ definitions:
       last_name:
         type: string
       password:
+        minLength: 6
         type: string
       phone:
         type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    type: object
+  users.LoginDto:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
     type: object
   users.UserResponse:
     properties:
@@ -61,6 +78,34 @@ info:
   title: Post-Chat eCommerce API
   version: "1.0"
 paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Takes a JSON payload and logs in a user
+      parameters:
+      - description: User to login
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/users.LoginDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login
+      tags:
+      - Authentication
   /products:
     post:
       consumes:

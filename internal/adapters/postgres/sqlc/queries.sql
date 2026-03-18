@@ -44,3 +44,6 @@ RETURNING
     *;
 
 SELECT * FROM users ORDER BY first_name;
+
+-- name: GetUserByEmail :one
+SELECT * FROM users WHERE email = $1 LIMIT 1;

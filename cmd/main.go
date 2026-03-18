@@ -14,6 +14,8 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -39,6 +41,14 @@ func main() {
 		db: dbConfig{
 			dsn: os.Getenv("DB_DSN"),
 		},
+		jwt_secret: []byte(os.Getenv("JWT_SECRET")),
+		jwt_exp: func() time.Duration {
+			val, _ := strconv.Atoi(os.Getenv("JWT_EXP"))
+			if val == 0 {
+				return 15 * time.Minute // Default to 15 mins
+			}
+			return time.Duration(val) * time.Minute
+		}(),
 	}
 
 	// 3. Setup the Water Tank (Database Pool)
