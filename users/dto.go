@@ -8,6 +8,11 @@ type CreateUserDTO struct {
 	Phone     string `json:"phone" validate:"omitempty,e164"`
 }
 
+type LoginDto struct {
+	Email string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+}
+
 type UserResponse struct {
 	Uuid      string `json:"uuid"`
 	FirstName string `json:"first_name"`

@@ -53,9 +53,10 @@ func (app *application) mount() http.Handler {
 	r.Get("/products", productHandler.GetAllProducts)
 	r.Post("/products", productHandler.AddProduct)
 
-	userService := users.NewUserService(repo.New(app.db))
+	userService := users.NewUserService(repo.New(app.db), app.config.jwt_secret, app.config.jwt_exp)
 	userHandler := users.NewHandler(userService)
 	r.Post("/signup", userHandler.CreateUser)
+	r.Post("/login", userHandler.Login)
 
 	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/docs/index.html", http.StatusSeeOther)
@@ -71,8 +72,10 @@ type application struct {
 }
 
 type config struct {
-	addr string
-	db   dbConfig
+	addr       string
+	db         dbConfig
+	jwt_secret []byte
+	jwt_exp    time.Duration
 }
 
 type dbConfig struct {
